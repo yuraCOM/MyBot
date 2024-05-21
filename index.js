@@ -6,7 +6,6 @@ const { gameOptions, againOptions } = require("./options");
 const TelegramApi = require("node-telegram-bot-api");
 const { stc } = require("./stickers");
 const { sequelize } = require("./db");
-// const sequelize = require("./db");
 const { UserModel } = require("./models");
 
 const TOKEN = "7117325295:AAGapWUoaa5oLG0JUDe2vJeGGfkwhISqvQs";
@@ -45,13 +44,22 @@ const start = async () => {
   ]);
 
   bot.on("message", async (msg) => {
+    // console.log(JSON.stringify(msg));
+
     const text = msg.text;
     const chatId = msg.chat.id;
-    // ${JSON.stringify(msg)}
-    //   bot.sendMessage(chatId, `Ты написал мне = ${text}`);
+
+    // bot.sendMessage(chatId, `${JSON.stringify(msg)}`);
+    // bot.sendMessage(chatId, `Ты  = ${chatId}`);
     try {
       if (text === "/start") {
-        await UserModel.sync({ chatId });
+        const user = await UserModel.findOne({ where: { chatId } });
+        // console.log("-----------------user: ", !user);
+        if (!user) {
+          // await UserModel.sync({ chatId });
+          await UserModel.create({ chatId });
+        }
+
         await bot.sendSticker(chatId, stc.intro);
         return bot.sendMessage(
           chatId,
@@ -60,8 +68,13 @@ const start = async () => {
       }
 
       if (text === "/info") {
-        const user = await UserModel.findOne({ chatId });
-        console.log(user);
+        // @ts-ignore
+        // chatId = chatId.toString();
+        const user = await UserModel.findOne({ where: { chatId } });
+
+        // await bot.sendMessage(chatId, `msg ${JSON.stringify(msg)}`);
+        // await bot.sendMessage(chatId, `user.chatId ${user.chatId}`);
+
         return bot.sendMessage(
           chatId,
           `Тебя зовут ${msg.from.first_name} username: ${msg.from.username}, в игре у тебя правильных ответов ${user.right}, неправильных ${user.wrong} `
@@ -74,7 +87,6 @@ const start = async () => {
 
       return bot.sendMessage(chatId, "Я тебя не понимаю, попробуй еще раз!)");
     } catch (e) {
-      console.log(e);
       return bot.sendMessage(chatId, "Произошла какая то ошибочка!)");
     }
   });
@@ -83,11 +95,12 @@ const start = async () => {
   bot.on("callback_query", async (msg) => {
     const data = msg.data;
     const chatId = msg.message.chat.id;
+    const user = await UserModel.findOne({ where: { chatId } });
     // await bot.sendMessage(chatId, `Ты выбрал ${data}`);
+    // await bot.sendMessage(chatId, `Ты game ${user.chatId}`);
     if (data === "/again") {
       return startGame(chatId);
     }
-    const user = await UserModel.findOne({ chatId });
 
     if (data == chats[chatId]) {
       user.right += 1;
@@ -106,6 +119,7 @@ const start = async () => {
         againOptions
       );
     }
+
     await user.save();
   });
 }; // start

@@ -8,7 +8,7 @@ const user = sequelize.define("user", {
     unique: true,
     autoIncrement: true,
   },
-  chatId: { type: DataTypes.STRING, unique: true },
+  chatId: { type: DataTypes.BIGINT, unique: true },
   right: { type: DataTypes.INTEGER, defaultValue: 0 },
   wrong: { type: DataTypes.INTEGER, defaultValue: 0 },
 });
