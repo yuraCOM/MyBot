@@ -1,6 +1,5 @@
 // 7117325295:AAGapWUoaa5oLG0JUDe2vJeGGfkwhISqvQs
 // https://t.me/YuraMyFirstBot
-//q
 
 const { gameOptions, againOptions } = require("./options");
 
