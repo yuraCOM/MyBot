@@ -29,6 +29,7 @@ const startGame = async (chatId) => {
 };
 
 const start = async () => {
+  //проверка базы
   try {
     await sequelize.authenticate();
     await sequelize.sync();
@@ -50,7 +51,7 @@ const start = async () => {
     //   bot.sendMessage(chatId, `Ты написал мне = ${text}`);
     try {
       if (text === "/start") {
-        await UserModel.create({ chatId });
+        await UserModel.sync({ chatId });
         await bot.sendSticker(chatId, stc.intro);
         return bot.sendMessage(
           chatId,
